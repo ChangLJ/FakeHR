@@ -80,3 +80,9 @@
 - **變更**：新增 GitHub → Cloud Build → Cloud Run 自動部署（`cloudbuild.yaml`、`cloudbuild.api.yaml`、`frontend/Dockerfile.cloudrun`）
 - **原因**：支援從 https://github.com/ChangLJ/FakeHR 推送 main 即自動部署，無需本機建置映像
 - **相關檔案**：`cloudbuild.yaml`、`cloudbuild.api.yaml`、`deploy/cloudrun-github.md`、`frontend/Dockerfile.cloudrun`、`frontend/nginx.cloudrun.conf`
+
+## 20260520-013
+
+- **變更**：Cloud Build 映像標籤改為 `$BUILD_ID`（修正 Cloud Shell 手動 `gcloud builds submit` 時 `$SHORT_SHA` 為空導致 `api:` 無效標籤）
+- **原因**：手動提交建置不會自動帶入 `SHORT_SHA`
+- **相關檔案**：`cloudbuild.api.yaml`、`cloudbuild.yaml`
