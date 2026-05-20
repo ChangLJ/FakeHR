@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: hsl(0 0% 100%);
+  --color-foreground: hsl(222.2 84% 4.9%);
+  --color-primary: hsl(199 89% 38%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-muted: hsl(210 40% 96%);
+  --color-muted-foreground: hsl(215 16% 47%);
+  --color-border: hsl(214 32% 91%);
+  --color-accent: hsl(186 100% 94%);
+  --color-destructive: hsl(0 84% 60%);
+  --color-card: hsl(0 0% 100%);
+  --radius-lg: 0.5rem;
+}
+
+body {
+  @apply bg-slate-50 text-foreground antialiased;
+  font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
+}
