@@ -86,3 +86,9 @@
 - **變更**：Cloud Build 映像標籤改為 `$BUILD_ID`（修正 Cloud Shell 手動 `gcloud builds submit` 時 `$SHORT_SHA` 為空導致 `api:` 無效標籤）
 - **原因**：手動提交建置不會自動帶入 `SHORT_SHA`
 - **相關檔案**：`cloudbuild.api.yaml`、`cloudbuild.yaml`
+
+## 20260520-014
+
+- **變更**：移除 `cloudbuild.yaml` 未使用的 `_DEPLOY_FRONTEND` substitution
+- **原因**：Cloud Build 要求 substitution 必須出現在 template 中，否則 `gcloud builds submit` 會報 `not matched in the template`
+- **相關檔案**：`cloudbuild.yaml`

@@ -6,7 +6,6 @@ substitutions:
   _AR_REPO: humanresource
   _SERVICE_API: humanresource-api
   _SERVICE_WEB: humanresource-web
-  _DEPLOY_FRONTEND: "true"
 
 options:
   logging: CLOUD_LOGGING_ONLY
