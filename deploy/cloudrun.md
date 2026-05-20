@@ -1,5 +1,7 @@
 # 部署至 GCP Cloud Run
 
+> **從 GitHub 自動部署**：請見 [cloudrun-github.md](./cloudrun-github.md)（連結 FakeHR → Cloud Build Trigger → Cloud Run）。
+
 本專案使用 **SQLite 單檔資料庫**，適合容器化部署。API 映像已支援 Cloud Run 的 `PORT` 環境變數。
 
 ## 架構建議

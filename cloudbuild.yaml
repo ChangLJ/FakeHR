@@ -1,0 +1,117 @@
+# GitHub → Cloud Build Trigger → Cloud Run（push main 時自動執行）
+# 於 Trigger 設定 Substitution：_JWT_SECRET（必填，至少 32 字元）
+
+substitutions:
+  _REGION: asia-east1
+  _AR_REPO: humanresource
+  _SERVICE_API: humanresource-api
+  _SERVICE_WEB: humanresource-web
+  _DEPLOY_FRONTEND: "true"
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+steps:
+  # --- API ---
+  - id: build-api
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/api:$SHORT_SHA
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/api:latest
+      - ./backend
+
+  - id: push-api
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - --all-tags
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/api
+
+  - id: deploy-api
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE_API}
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/api:$SHORT_SHA
+      - --region=${_REGION}
+      - --platform=managed
+      - --allow-unauthenticated
+      - --port=8080
+      - --memory=512Mi
+      - --cpu=1
+      - --set-env-vars=ASPNETCORE_ENVIRONMENT=Production,ASPNETCORE_URLS=http://0.0.0.0:8080,DATABASE_PATH=/app/data/humanresource.db
+      - --set-env-vars=Jwt__Secret=${_JWT_SECRET}
+
+  # --- Frontend（依 API 網址建置，直連 API；需 CORS）---
+  - id: get-api-url
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+        API_URL=$(gcloud run services describe ${_SERVICE_API} --region=${_REGION} --format='value(status.url)')
+        echo "VITE_API_URL=$${API_URL}/api" > /workspace/build.env
+        cat /workspace/build.env
+
+  - id: build-web
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    dir: frontend
+    args:
+      - -c
+      - |
+        set -e
+        source /workspace/build.env
+        docker build -f Dockerfile.cloudrun \
+          --build-arg VITE_API_URL=$$VITE_API_URL \
+          -t ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/web:$SHORT_SHA \
+          -t ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/web:latest \
+          .
+    waitFor: ["get-api-url"]
+
+  - id: push-web
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - --all-tags
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/web
+    waitFor: ["build-web"]
+
+  - id: deploy-web
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE_WEB}
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/web:$SHORT_SHA
+      - --region=${_REGION}
+      - --platform=managed
+      - --allow-unauthenticated
+      - --port=80
+      - --memory=256Mi
+    waitFor: ["push-web"]
+
+  - id: update-api-cors
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+        WEB_URL=$(gcloud run services describe ${_SERVICE_WEB} --region=${_REGION} --format='value(status.url)')
+        gcloud run services update ${_SERVICE_API} --region=${_REGION} \
+          --update-env-vars=Cors__Origins__0=$${WEB_URL}
+    waitFor: ["deploy-web"]
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/api:$SHORT_SHA
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/api:latest
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/web:$SHORT_SHA
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/web:latest

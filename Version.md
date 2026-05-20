@@ -74,3 +74,9 @@
 - **變更**：示範帳號若仍含真實個資則啟動時重設為假資料；驗證失敗欄位紅框並捲動至第一個錯誤；待遇「依公司規定/面議」改為互斥單選；新增履歷審閱頁 `/review` 與彈窗檢視
 - **原因**：舊 DB 仍保留個資；改善表單 UX；避免待遇選項同時勾選；HR 需瀏覽多份申請表
 - **相關檔案**：`backend/Data/DemoApplicationFactory.cs`、`backend/Data/DbSeeder.cs`、`backend/Controllers/ReviewController.cs`、`frontend/src/utils/formValidation.ts`、`frontend/src/stores/application.ts`、`frontend/src/views/ReviewView.vue`、`frontend/src/views/tabs/SelfIntroTab.vue`
+
+## 20260520-012
+
+- **變更**：新增 GitHub → Cloud Build → Cloud Run 自動部署（`cloudbuild.yaml`、`cloudbuild.api.yaml`、`frontend/Dockerfile.cloudrun`）
+- **原因**：支援從 https://github.com/ChangLJ/FakeHR 推送 main 即自動部署，無需本機建置映像
+- **相關檔案**：`cloudbuild.yaml`、`cloudbuild.api.yaml`、`deploy/cloudrun-github.md`、`frontend/Dockerfile.cloudrun`、`frontend/nginx.cloudrun.conf`

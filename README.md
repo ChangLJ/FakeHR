@@ -20,6 +20,11 @@
 2. **工作經歷** — 工作經歷、證照、聯絡人推薦
 3. **自我簡介** — 興趣、規劃、自傳、出差意願、待遇
 
+## 部署至 GCP（GitHub 自動）
+
+推送 [GitHub: ChangLJ/FakeHR](https://github.com/ChangLJ/FakeHR) 的 `main` 分支可透過 Cloud Build 自動部署至 Cloud Run。  
+設定步驟見：**[deploy/cloudrun-github.md](deploy/cloudrun-github.md)**
+
 ## 快速開始（Docker）
 
 **Windows 一鍵除錯：** 雙擊專案根目錄的 `Debug.bat`
