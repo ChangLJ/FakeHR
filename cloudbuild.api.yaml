@@ -19,7 +19,10 @@ steps:
       - ./backend
 
   - name: gcr.io/cloud-builders/docker
-    args: [push, --all-tags, ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/api]
+    args:
+      - push
+      - --all-tags
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/api
 
   - name: gcr.io/google.com/cloudsdktool/cloud-sdk
     entrypoint: gcloud
